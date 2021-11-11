@@ -1,5 +1,7 @@
 import {startWorker, zBClient} from "./zeebeWorker"
 import { LoggerAdaptToConsole } from "console-log-json";
+import {getAlfrescoInfo} from "./ged-connector"
+
 
 require('dotenv').config()
 
@@ -16,4 +18,6 @@ process.on( 'SIGINT', function() {
     process.exit( );
 })
 
-startWorker()
+//startWorker()
+
+getAlfrescoInfo()
