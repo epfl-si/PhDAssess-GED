@@ -12,8 +12,10 @@ import {AlfrescoTicketResponse} from "./alfresco_types"
 
 
 const debug = debug_('ged-connector')
+
 const alfrescoBaseURL = process.env.ALFRESCO_URL
 const alfrescoLoginUrl = new URL(`/alfresco/service/api/login`, alfrescoBaseURL)
+const alfrescoRequestTimeoutMS = 40000
 
 
 let _ticket: string | undefined = undefined
@@ -25,7 +27,14 @@ const getTicket = async (): Promise<string | undefined> => {
         try {
             if (process.env.ALFRESCO_USERNAME && process.env.ALFRESCO_PASSWORD) {
                 alfrescoLoginUrl.search = `u=${process.env.ALFRESCO_USERNAME}&pw=${process.env.ALFRESCO_PASSWORD}&format=json`
-                const dataTicket: AlfrescoTicketResponse = await got.get(alfrescoLoginUrl, {}).json()
+                const dataTicket: AlfrescoTicketResponse = await got.get(alfrescoLoginUrl, {
+                  timeout: {
+                    request: alfrescoRequestTimeoutMS
+                  },
+                  retry: {
+                    limit: 0
+                  },
+                }).json()
 
                 debug(`Asked for the alfresco ticket and got ${_ticket}`)
                 return dataTicket.data.ticket
@@ -90,8 +99,14 @@ export const uploadPDF = async (studentName: string,
         await got.post(
             alfrescoStudentsFolder,
             {
-                body: Readable.from(encoder.encode()),
-                headers: encoder.headers
+              body: Readable.from(encoder.encode()),
+              headers: encoder.headers,
+              timeout: {
+                request: alfrescoRequestTimeoutMS
+              },
+              retry: {
+                limit: 0
+              },
             }
         )
         console.log(`Succesfully uploaded the ${pdfFileName} for ${studentName} (${sciper})`)

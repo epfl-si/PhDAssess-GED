@@ -3,6 +3,7 @@ import {Duration, ZBWorkerTaskHandler} from 'zeebe-node'
 import debug_ from 'debug'
 import {decryptVariables, encrypt} from "./encryption";
 import {flatPick} from "./utils";
+import {readFolder, uploadPDF} from "./ged-connector";
 const version = require('./version.js');
 
 const debug = debug_('phd-assess/zeebeWorker')
@@ -38,12 +39,39 @@ const handler: ZBWorkerTaskHandler = async (
 
   const jobVariables = decryptVariables(job)
 
-  debug(`Job is complete, ...`);
+  const phdStudentName = jobVariables.phdStudentName
+  const phdStudentSciper = jobVariables.phdStudentSciper
+  const doctoratID = jobVariables.doctoralProgramName
 
-  const updateBrokerVariables = {
+  const pdfFileName = `Rapport annuel doctorat.pdf`
+  const base64String = jobVariables.PDF
+  const pdfFile = Buffer.from(base64String, 'base64')
+
+  // check first if the awaited student folder exists
+  try {
+    await readFolder(phdStudentName, phdStudentSciper, doctoratID)
+
+    // ok, looks fine, now try to deposit the pdf
+    try {
+      await uploadPDF(
+        phdStudentName, phdStudentSciper, doctoratID,
+        pdfFileName, pdfFile
+      )
+
+      console.log(`Job is complete, ...`);
+
+      const updateBrokerVariables = {
+        gedDepositedDate: encrypt(new Date().toISOString()),
       }
 
-  return job.complete(updateBrokerVariables)
+      return job.complete(updateBrokerVariables)
+
+    } catch (e: any) {
+      return job.error('504',`Unable to deposit the PDF: GED unreachable. ${e.message}`)
+    }
+  } catch (e: any) {
+    return job.error('404',`Unable to deposit the PDF: Student folder does not exist. ${e.message}`)
+  }
 }
 
 export const startWorker = () => {

@@ -1,6 +1,5 @@
 import {startWorker, zBClient} from "./zeebeWorker"
 import { LoggerAdaptToConsole } from "console-log-json";
-import {readFolder, uploadPDF} from "./ged-connector"
 
 require('dotenv').config()
 
@@ -17,18 +16,4 @@ process.on( 'SIGINT', function() {
     process.exit( );
 })
 
-//startWorker()
-
-const jobVariables = {
-    phdStudentName: process.env.PHDSTUDENTNAME1!,
-    phdStudentSciper: process.env.PHDSUTDENTSCIPER1!,
-}
-const doctoratID = process.env.PHDSTUDENTDOCTORAT1!
-
-const pdfFileName = `Rapport annuel doctorat1.pdf`
-const base64String = process.env.PDFSTRING!
-const pdfFile = Buffer.from(base64String, 'base64')
-
-// readFolder(jobVariables.phdStudentName, jobVariables.phdStudentSciper, doctoratID!)
-// before sending, check that the user folder is fine
-uploadPDF(jobVariables.phdStudentName, jobVariables.phdStudentSciper, doctoratID, pdfFileName, pdfFile)
+startWorker()

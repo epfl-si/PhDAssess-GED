@@ -66,7 +66,7 @@
               - name: 'ZEEBE_ADDRESS'
                 value: 'zeebe-broker:26500'
               - name: 'ZEEBE_TASK_TYPE'
-                value: 'phdSendGED'
+                value: 'phdGEDDeposit'
               - name: 'CONSOLE_LOG_JSON_NO_STACK_FOR_NON_ERROR'
                 value: 'true'
               - name: 'CONSOLE_LOG_JSON_NO_FILE_NAME'
