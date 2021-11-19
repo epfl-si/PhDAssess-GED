@@ -1,6 +1,15 @@
 - name: Secrets tasks
-  include_tasks: '{{ "secrets.yml" }}'
+  include_tasks:
+    file: "secrets.yml"
+    apply:
+      tags: secrets
+  tags: secrets
 
 - name: Phd assess ged tasks
-  include_tasks: '{{ "phd_assess_ged.yml" }}'
-  tags: [ged-build, ged-push]
+  include_tasks:
+    file: "phd_assess_ged.yml"
+    apply:
+      tags: ged
+  tags:
+    - ged-build
+    - ged-push

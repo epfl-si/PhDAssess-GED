@@ -76,7 +76,7 @@ const handler: ZBWorkerTaskHandler = async (
 }
 
 export const startWorker = () => {
-  console.log(`starting phd-assess-pdf version ${version}...`)
+  console.log(`starting phd-assess-ged version ${version}...`)
   console.log("starting worker...")
 
   const worker = zBClient.createWorker({

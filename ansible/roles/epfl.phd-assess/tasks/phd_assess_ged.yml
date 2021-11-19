@@ -8,7 +8,6 @@
   delegate_to: localhost
   register: output_docker_build
 - debug: var=output_docker_build.stdout_lines
-  include_vars: main.yml
   tags:
     - ged-build
     - never
@@ -24,14 +23,13 @@
   register: output_push_image
   delegate_to: localhost
 - debug: var=output_push_image.stdout_lines
-  include_vars: main.yml
   tags:
     - ged-push
     - never
 
 - name: phd-assess-ged Deployment Config
   tags:
-    - meteor
+    - ged
   openshift:
     apiVersion: apps.openshift.io/v1
     kind: DeploymentConfig
@@ -64,18 +62,30 @@
           containers:
             - env:
               - name: 'ZEEBE_ADDRESS'
-                value: 'zeebe-broker:26500'
+                value: 'zeebe-gateway:26500'
               - name: 'ZEEBE_TASK_TYPE'
                 value: 'phdGEDDeposit'
               - name: 'CONSOLE_LOG_JSON_NO_STACK_FOR_NON_ERROR'
                 value: 'true'
               - name: 'CONSOLE_LOG_JSON_NO_FILE_NAME'
                 value: 'true'
+              - name: 'ALFRESCO_URL'
+                value: 'https://integration-gedetu.epfl.ch'
               - name: "{{ encryption_key_name }}"
                 valueFrom:
                   secretKeyRef:
                     name: "{{ secret_name }}"
                     key: "{{ encryption_key_name }}"
+              - name: "{{ alfresco_user_key_name }}"
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ ged_secret_name }}"
+                    key: "{{ alfresco_user_key_name }}"
+              - name: "{{ alfresco_password_key_name }}"
+                valueFrom:
+                  secretKeyRef:
+                    name: "{{ ged_secret_name }}"
+                    key: "{{ alfresco_password_key_name }}"
               image: 'docker-registry.default.svc:5000/{{openshift_namespace}}/phd-assess-ged:latest'
               imagePullPolicy: Always
               name: phd-assess-ged
