@@ -4,6 +4,7 @@ import debug_ from 'debug'
 import {decryptVariables, encrypt} from "./encryption";
 import {flatPick} from "./utils";
 import {readFolder, uploadPDF} from "./ged-connector";
+
 const version = require('./version.js');
 
 const debug = debug_('phd-assess/zeebeWorker')
@@ -18,7 +19,7 @@ const handler: ZBWorkerTaskHandler = async (
   job,
   _,
   worker
-  ) => {
+) => {
   worker.debug(`Task variables ${job.variables}`)
   debug(`Job "${taskType}" started`);
 
@@ -67,10 +68,10 @@ const handler: ZBWorkerTaskHandler = async (
       return job.complete(updateBrokerVariables)
 
     } catch (e: any) {
-      return job.error('504',`Unable to deposit the PDF: GED unreachable. ${e.message}`)
+      return job.error('504', `Unable to deposit the PDF: GED unreachable. ${e.message}`)
     }
   } catch (e: any) {
-    return job.error('404',`Unable to deposit the PDF: Student folder does not exist. ${e.message}`)
+    return job.error('404', `Unable to deposit the PDF: Student folder does not exist. ${e.message}`)
   }
 }
 

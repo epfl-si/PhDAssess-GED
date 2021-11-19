@@ -1,5 +1,5 @@
 export type AlfrescoTicketResponse = {
-    data: {
-        ticket: string
-    }
+  data: {
+    ticket: string
+  }
 }

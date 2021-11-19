@@ -1,19 +1,19 @@
 import {startWorker, zBClient} from "./zeebeWorker"
-import { LoggerAdaptToConsole } from "console-log-json";
+import {LoggerAdaptToConsole} from "console-log-json";
 
 require('dotenv').config()
 
 // Start logging as JSON if we are not in debug mode
 if (!process.env.DEBUG?.search('/\*/')) {
-    LoggerAdaptToConsole()
+  LoggerAdaptToConsole()
 }
 
-process.on( 'SIGINT', function() {
-    console.log( "\nGracefully shutting down from SIGINT (Ctrl-C)" );
-    // some other closing procedures go here
-    console.log('Closing any worker client running...')
-    zBClient.close().then(() => console.log('All workers closed'))
-    process.exit( );
+process.on('SIGINT', function () {
+  console.log("\nGracefully shutting down from SIGINT (Ctrl-C)");
+  // some other closing procedures go here
+  console.log('Closing any worker client running...')
+  zBClient.close().then(() => console.log('All workers closed'))
+  process.exit();
 })
 
 startWorker()

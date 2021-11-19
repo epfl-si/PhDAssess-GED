@@ -29,8 +29,8 @@ export function decrypt(cryptedMessage: string, passphrase: string | undefined =
   }
 }
 
-export function decryptVariables(job: Job): {[key: string]: string} {
-  const decryptedVariables: {[key: string]: string} = {}
+export function decryptVariables(job: Job): { [key: string]: string } {
+  const decryptedVariables: { [key: string]: string } = {}
 
   Object.keys(job.variables).map((key) => {
     try {
