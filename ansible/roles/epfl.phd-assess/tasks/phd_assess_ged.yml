@@ -70,7 +70,7 @@
               - name: 'CONSOLE_LOG_JSON_NO_FILE_NAME'
                 value: 'true'
               - name: 'ALFRESCO_URL'
-                value: 'https://integration-gedetu.epfl.ch'
+                value: "{{ alfresco_url }}"
               - name: "{{ encryption_key_name }}"
                 valueFrom:
                   secretKeyRef:

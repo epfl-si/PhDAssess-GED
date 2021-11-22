@@ -1,0 +1,10 @@
+# Test inventory
+# N.B.: groups and group variables are defined in ../inventory.yml
+
+all:
+  children:
+    openshift_namespaces:
+      hosts:
+        phd-assess-test: {}
+      vars:
+        alfresco_url: "https://integration-gedetu.epfl.ch"
