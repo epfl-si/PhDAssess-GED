@@ -109,7 +109,7 @@ export const uploadPDF = async (studentName: string,
         },
       }
     )
-    console.log(`Succesfully uploaded the ${pdfFileName} for ${studentName} (${sciper})`)
+    console.log(`Succesfully uploaded the ${pdfFileName} for ${studentName} (${sciper}) into ${alfrescoStudentsFolder}`)
   } catch (e: any) {
     console.log(`Unable to send the PDF file. Error was : ${e.message}`)
     // throw the error back to Zeebe
