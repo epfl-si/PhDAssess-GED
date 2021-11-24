@@ -5,6 +5,5 @@ all:
   children:
     openshift_namespaces:
       hosts:
-        phd-assess: {}
-      vars:
-        alfresco_url: "https://ged-etu.epfl.ch"
+        phd-assess:
+          alfresco_url: "https://ged-etu.epfl.ch"
