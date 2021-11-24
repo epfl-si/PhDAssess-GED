@@ -36,7 +36,7 @@ const getTicket = async (): Promise<string | undefined> => {
           },
         }).json()
 
-        debug(`Asked for the alfresco ticket and got ${_ticket}`)
+        debug(`Asked for the alfresco ticket and got ${dataTicket}`)
         return dataTicket.data.ticket
       }
     } catch (e: any) {
