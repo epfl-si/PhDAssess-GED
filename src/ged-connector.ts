@@ -13,41 +13,36 @@ import {AlfrescoTicketResponse} from "./alfresco_types"
 
 const debug = debug_('ged-connector')
 
-const alfrescoBaseURL = process.env.ALFRESCO_URL
+export const alfrescoBaseURL = process.env.ALFRESCO_URL
 const alfrescoLoginUrl = new URL(`/alfresco/service/api/login`, alfrescoBaseURL)
-const alfrescoRequestTimeoutMS = 40000
+const alfrescoRequestTimeoutMS = 40000  // 40 seconds
 
 
 let _ticket: string | undefined = undefined
 
-const getTicket = async (): Promise<string | undefined> => {
-  if (_ticket) {
+export const getTicket = async (forceNew=false): Promise<string | undefined> => {
+  if (!forceNew && _ticket) {
     return Promise.resolve(_ticket)
   } else {
-    try {
-      if (process.env.ALFRESCO_USERNAME && process.env.ALFRESCO_PASSWORD) {
-        alfrescoLoginUrl.search = `u=${process.env.ALFRESCO_USERNAME}&pw=${process.env.ALFRESCO_PASSWORD}&format=json`
-        const dataTicket: AlfrescoTicketResponse = await got.get(alfrescoLoginUrl, {
-          timeout: {
-            request: alfrescoRequestTimeoutMS
-          },
-          retry: {
-            limit: 0
-          },
-        }).json()
+    if (process.env.ALFRESCO_USERNAME && process.env.ALFRESCO_PASSWORD) {
+      alfrescoLoginUrl.search = `u=${process.env.ALFRESCO_USERNAME}&pw=${process.env.ALFRESCO_PASSWORD}&format=json`
+      const dataTicket: AlfrescoTicketResponse = await got.get(alfrescoLoginUrl, {
+        timeout: {
+          request: alfrescoRequestTimeoutMS
+        },
+        retry: {
+          limit: 0
+        },
+      }).json()
 
-        debug(`Asked for the alfresco ticket and got ${dataTicket}`)
-        return dataTicket.data.ticket
-      }
-    } catch (e: any) {
-      console.error(`Failed: unable to fetch a ticket from Alfresco. ${e.message}`)
-      // send the error back to zeebe
-      throw e
+      debug(`Asked for the alfresco ticket and got ${JSON.stringify(dataTicket)}`)
+      return dataTicket.data.ticket
     }
   }
 }
 
-const getStudentFolderURL = (studentName: string, sciper: string, doctoratID: string, ticket: string): URL => {
+export const getStudentFolderURL = async (studentName: string, sciper: string, doctoratID: string): Promise<URL> => {
+  const ticket = await getTicket()
   const studentFolderName = `${studentName}, ${sciper}`
   const doctoratName = _.find(ecolesDoctorales, {id: doctoratID})?.label ?? doctoratID
 
@@ -57,30 +52,20 @@ const getStudentFolderURL = (studentName: string, sciper: string, doctoratID: st
   )
 
   StudentsFolderURL.search = `alf_ticket=${ticket}&format=json`
-
   return StudentsFolderURL
 }
 
-export const readFolder = async (studentName: string, sciper: string, doctoratID: string) => {
-  const ticket = await getTicket()
-
-  const alfrescoStudentsFolder = getStudentFolderURL(studentName, sciper, doctoratID, ticket!)
-
-  debug(`Will fetch the student folder with url ${alfrescoStudentsFolder}`)
-  const studentFolderInfo = await got.get(alfrescoStudentsFolder, {}).json()
-  console.log(`Fetched ${JSON.stringify(studentFolderInfo, null, 2)}`)
+export const readFolder = async (studentFolder: URL,) => {
+  debug(`Will fetch the student folder with url ${studentFolder}`)
+  const studentFolderInfo = await got.get(studentFolder, {}).json()
+  debug(`Fetched ${JSON.stringify(studentFolderInfo, null, 2)}`)
 }
 
-export const uploadPDF = async (studentName: string,
-                                sciper: string,
-                                doctoratID: string,
+export const uploadPDF = async (studentFolder: URL,
                                 pdfFileName: string,
                                 pdfFile: Buffer) => {
-  const ticket = await getTicket()
 
-  const alfrescoStudentsFolder = getStudentFolderURL(studentName, sciper, doctoratID, ticket!)
-
-  debug(`Will post the PDF with url ${alfrescoStudentsFolder}`)
+  debug(`Will post the PDF with url ${studentFolder}`)
 
   const form = new FormData()
   form.set('cmisaction', 'createDocument')
@@ -95,24 +80,18 @@ export const uploadPDF = async (studentName: string,
   form.set('file', pdfBlob)
   const encoder = new FormDataEncoder(form)
 
-  try {
-    await got.post(
-      alfrescoStudentsFolder,
-      {
-        body: Readable.from(encoder.encode()),
-        headers: encoder.headers,
-        timeout: {
-          request: alfrescoRequestTimeoutMS
-        },
-        retry: {
-          limit: 0
-        },
-      }
-    )
-    console.log(`Succesfully uploaded the ${pdfFileName} for ${studentName} (${sciper}) into ${alfrescoStudentsFolder}`)
-  } catch (e: any) {
-    console.log(`Unable to send the PDF file. Error was : ${e.message}`)
-    // throw the error back to Zeebe
-    throw e
-  }
+  await got.post(
+    studentFolder,
+    {
+      body: Readable.from(encoder.encode()),
+      headers: encoder.headers,
+      timeout: {
+        request: alfrescoRequestTimeoutMS
+      },
+      retry: {
+        limit: 0
+      },
+    }
+  )
+
 }
