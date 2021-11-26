@@ -61,32 +61,7 @@
             deployment-config.name: phd-assess-ged
         spec:
           containers:
-            - env:
-              - name: 'ZEEBE_ADDRESS'
-                value: 'zeebe-gateway:26500'
-              - name: 'ZEEBE_TASK_TYPE'
-                value: 'phdGEDDeposit'
-              - name: 'CONSOLE_LOG_JSON_NO_STACK_FOR_NON_ERROR'
-                value: 'true'
-              - name: 'CONSOLE_LOG_JSON_NO_FILE_NAME'
-                value: 'true'
-              - name: 'ALFRESCO_URL'
-                value: "{{ alfresco_url }}"
-              - name: "{{ encryption_key_name }}"
-                valueFrom:
-                  secretKeyRef:
-                    name: "{{ secret_name }}"
-                    key: "{{ encryption_key_name }}"
-              - name: "{{ alfresco_user_key_name }}"
-                valueFrom:
-                  secretKeyRef:
-                    name: "{{ ged_secret_name }}"
-                    key: "{{ alfresco_user_key_name }}"
-              - name: "{{ alfresco_password_key_name }}"
-                valueFrom:
-                  secretKeyRef:
-                    name: "{{ ged_secret_name }}"
-                    key: "{{ alfresco_password_key_name }}"
+            - env: "{{ deployment_envs }}"
               image: 'docker-registry.default.svc:5000/{{openshift_namespace}}/phd-assess-ged:latest'
               imagePullPolicy: Always
               name: phd-assess-ged
