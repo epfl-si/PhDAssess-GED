@@ -85,11 +85,11 @@ const handler: ZBWorkerTaskHandler = async (
         return job.error('504', `Unable to upload the PDF. ${e.message}`)
       }
     } catch (e: any) {
-      console.error(`Failed to read the student folder ${alfrescoStudentsFolderURL}. Erroring..`)
+      console.error(`Failed to read the student folder ${alfrescoStudentsFolderURL}. Erroring was ${e.message}`)
       return job.error('404', `Unable to find the student folder${alfrescoStudentsFolderURL}. ${e.message}`)
     }
   } catch (e: any) {
-    console.error(`Failed to get an Alfresco ticket on ${alfrescoBaseURL}. Erroring..`)
+    console.error(`Failed to get an Alfresco ticket on ${alfrescoBaseURL}. Error was ${e.message}`)
     return job.error('504', `Unable to get an Alfresco ticket. ${e.message}`)
   }
 }
