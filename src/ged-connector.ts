@@ -36,7 +36,11 @@ export const getTicket = async (forceNew=false): Promise<string | undefined> => 
       }).json()
 
       debug(`Asked for the alfresco ticket and got ${JSON.stringify(dataTicket)}`)
-      return dataTicket.data.ticket
+
+      if (!dataTicket.data.ticket) throw new Error(`Alresco answered but did not give any ticket. Returned data : ${JSON.stringify(dataTicket)}`)
+
+      _ticket = dataTicket.data.ticket
+      return _ticket
     }
   }
 }
