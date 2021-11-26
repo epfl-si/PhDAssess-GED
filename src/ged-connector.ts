@@ -18,35 +18,28 @@ const alfrescoLoginUrl = new URL(`/alfresco/service/api/login`, alfrescoBaseURL)
 const alfrescoRequestTimeoutMS = 40000  // 40 seconds
 
 
-let _ticket: string | undefined = undefined
+export const fetchTicket = async (): Promise<string> => {
+  if (process.env.ALFRESCO_USERNAME && process.env.ALFRESCO_PASSWORD) {
+    alfrescoLoginUrl.search = `u=${process.env.ALFRESCO_USERNAME}&pw=${process.env.ALFRESCO_PASSWORD}&format=json`
+    const dataTicket: AlfrescoTicketResponse = await got.get(alfrescoLoginUrl, {
+      timeout: {
+        request: alfrescoRequestTimeoutMS
+      },
+      retry: {
+        limit: 0
+      },
+    }).json()
 
-export const getTicket = async (forceNew=false): Promise<string | undefined> => {
-  if (!forceNew && _ticket) {
-    return Promise.resolve(_ticket)
+    debug(`Asked for the alfresco ticket and got ${JSON.stringify(dataTicket)}`)
+
+    if (!dataTicket.data.ticket) throw new Error(`Alresco answered but did not give any ticket. Returned data : ${JSON.stringify(dataTicket)}`)
+    return dataTicket.data.ticket
   } else {
-    if (process.env.ALFRESCO_USERNAME && process.env.ALFRESCO_PASSWORD) {
-      alfrescoLoginUrl.search = `u=${process.env.ALFRESCO_USERNAME}&pw=${process.env.ALFRESCO_PASSWORD}&format=json`
-      const dataTicket: AlfrescoTicketResponse = await got.get(alfrescoLoginUrl, {
-        timeout: {
-          request: alfrescoRequestTimeoutMS
-        },
-        retry: {
-          limit: 0
-        },
-      }).json()
-
-      debug(`Asked for the alfresco ticket and got ${JSON.stringify(dataTicket)}`)
-
-      if (!dataTicket.data.ticket) throw new Error(`Alresco answered but did not give any ticket. Returned data : ${JSON.stringify(dataTicket)}`)
-
-      _ticket = dataTicket.data.ticket
-      return _ticket
-    }
+    throw new Error(`Missing environment variables to ALFRESCO_USERNAME and/or ALFRESCO_PASSWORD`)
   }
 }
 
-export const getStudentFolderURL = async (studentName: string, sciper: string, doctoratID: string): Promise<URL> => {
-  const ticket = await getTicket()
+export const getStudentFolderURL = async (studentName: string, sciper: string, doctoratID: string, ticket: string): Promise<URL> => {
   const studentFolderName = `${studentName}, ${sciper}`
   const doctoratName = _.find(ecolesDoctorales, {id: doctoratID})?.label ?? doctoratID
 

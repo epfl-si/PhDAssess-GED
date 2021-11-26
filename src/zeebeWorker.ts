@@ -3,7 +3,13 @@ import {Duration, ZBWorkerTaskHandler} from 'zeebe-node'
 import debug_ from 'debug'
 import {decryptVariables, encrypt} from "./encryption";
 import {flatPick} from "./utils";
-import {alfrescoBaseURL, getStudentFolderURL, getTicket, readFolder, uploadPDF} from "./ged-connector";
+import {
+  alfrescoBaseURL,
+  fetchTicket,
+  getStudentFolderURL,
+  readFolder,
+  uploadPDF
+} from "./ged-connector";
 
 const version = require('./version.js');
 
@@ -50,40 +56,41 @@ const handler: ZBWorkerTaskHandler = async (
 
   try {
     // first always get a new ticket for incoming operations or fail trying
-    await getTicket(true)
+    const ticket = await fetchTicket()
+    // build the student URL
+    const alfrescoStudentsFolderURL = await getStudentFolderURL(phdStudentName,
+        phdStudentSciper,
+        doctoratID,
+        ticket)
+
+    // check if the awaited student folder exists
+    try {
+      await readFolder(alfrescoStudentsFolderURL)
+      // ok, looks fine, now try to deposit the pdf
+      try {
+        await uploadPDF(
+            alfrescoStudentsFolderURL,
+            pdfFileName, pdfFile
+        )
+
+        console.log(`Successfully uploaded the ${pdfFileName} for ${phdStudentName} (${phdStudentSciper}) into ${alfrescoStudentsFolderURL}`)
+
+        const updateBrokerVariables = {
+          gedDepositedDate: encrypt(new Date().toISOString()),
+        }
+
+        return job.complete(updateBrokerVariables)
+      } catch (e: any) {
+        console.log(`Unable to send the PDF file into ${alfrescoStudentsFolderURL}. Error was : ${e.message}`)
+        return job.error('504', `Unable to upload the PDF. ${e.message}`)
+      }
+    } catch (e: any) {
+      console.error(`Failed to read the student folder ${alfrescoStudentsFolderURL}. Erroring..`)
+      return job.error('404', `Unable to find the student folder${alfrescoStudentsFolderURL}. ${e.message}`)
+    }
   } catch (e: any) {
     console.error(`Failed to get an Alfresco ticket on ${alfrescoBaseURL}. Erroring..`)
     return job.error('504', `Unable to get an Alfresco ticket. ${e.message}`)
-  }
-
-  // build the student URL
-  const alfrescoStudentsFolderURL = await getStudentFolderURL(phdStudentName, phdStudentSciper, doctoratID)
-
-  // check if the awaited student folder exists
-  try {
-    await readFolder(alfrescoStudentsFolderURL)
-  } catch (e: any) {
-    console.error(`Failed to read the student folder ${alfrescoStudentsFolderURL}. Erroring..`)
-    return job.error('404', `Unable to find the student folder${alfrescoStudentsFolderURL}. ${e.message}`)
-  }
-
-  // ok, looks fine, now try to deposit the pdf
-  try {
-    await uploadPDF(
-        alfrescoStudentsFolderURL,
-        pdfFileName, pdfFile
-    )
-
-    console.log(`Successfully uploaded the ${pdfFileName} for ${phdStudentName} (${phdStudentSciper}) into ${alfrescoStudentsFolderURL}`)
-
-    const updateBrokerVariables = {
-      gedDepositedDate: encrypt(new Date().toISOString()),
-    }
-
-    return job.complete(updateBrokerVariables)
-  } catch (e: any) {
-    console.log(`Unable to send the PDF file into ${alfrescoStudentsFolderURL}. Error was : ${e.message}`)
-    return job.error('504', `Unable to upload the PDF. ${e.message}`)
   }
 }
 
