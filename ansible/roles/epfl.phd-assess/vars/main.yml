@@ -11,5 +11,5 @@ phd_assess_ged_remote_image_tag: "{{openshift_image_registry}}/{{openshift_names
 secret_name: "phd-assess.secrets"
 ged_secret_name: "phd-assess.ged.secrets"
 encryption_key_name: "PHDASSESS_ENCRYPTION_KEY"
-alfresco_user_key_name: "ALFRESCO_USER"
+alfresco_user_key_name: "ALFRESCO_USERNAME"
 alfresco_password_key_name: "ALFRESCO_PASSWORD"
