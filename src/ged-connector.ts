@@ -49,11 +49,12 @@ export const getStudentFolderURL = async (studentName: string, sciper: string, d
   )
 
   StudentsFolderURL.search = `alf_ticket=${ticket}&format=json`
+
+  debug(`Using student folder with url ${StudentsFolderURL}`)
   return StudentsFolderURL
 }
 
 export const readFolder = async (studentFolder: URL,) => {
-  debug(`Will fetch the student folder with url ${studentFolder}`)
   const studentFolderInfo = await got.get(studentFolder, {}).json()
   debug(`Fetched ${JSON.stringify(studentFolderInfo, null, 2)}`)
 }
@@ -61,9 +62,6 @@ export const readFolder = async (studentFolder: URL,) => {
 export const uploadPDF = async (studentFolder: URL,
                                 pdfFileName: string,
                                 pdfFile: Buffer) => {
-
-  debug(`Will post the PDF with url ${studentFolder}`)
-
   const form = new FormData()
   form.set('cmisaction', 'createDocument')
   form.set('propertyId[0]', 'cmis:objectTypeId')

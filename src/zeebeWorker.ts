@@ -46,7 +46,15 @@ const handler: ZBWorkerTaskHandler = async (
 
   const jobVariables = decryptVariables(job)
 
-  const phdStudentName = jobVariables.phdStudentName
+  const buildStudentName = (jobVariables: any) => {
+    if (jobVariables.phdStudentFirstName && jobVariables.phdStudentLastName) {
+      return `${jobVariables.phdStudentLastName}, ${jobVariables.phdStudentFirstName}`
+    } else {
+      return jobVariables.phdStudentName
+    }
+  }
+  const phdStudentName = buildStudentName(jobVariables)
+
   const phdStudentSciper = jobVariables.phdStudentSciper
   const doctoratID = jobVariables.doctoralProgramName
 
