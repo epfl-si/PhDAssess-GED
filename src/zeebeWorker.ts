@@ -56,7 +56,7 @@ const handler: ZBWorkerTaskHandler = async (
   const phdStudentName = buildStudentName(jobVariables)
 
   const phdStudentSciper = jobVariables.phdStudentSciper
-  const doctoratID = jobVariables.doctoralProgramName
+  const doctoralID = jobVariables.doctoralProgramName
 
   const pdfFileName = `Rapport annuel doctorat.pdf`
   const base64String = jobVariables.PDF
@@ -68,7 +68,7 @@ const handler: ZBWorkerTaskHandler = async (
     // build the student URL
     const alfrescoStudentsFolderURL = await getStudentFolderURL(phdStudentName,
         phdStudentSciper,
-        doctoratID,
+        doctoralID,
         ticket)
 
     // check if the awaited student folder exists

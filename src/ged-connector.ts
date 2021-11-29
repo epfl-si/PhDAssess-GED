@@ -39,9 +39,9 @@ export const fetchTicket = async (): Promise<string> => {
   }
 }
 
-export const getStudentFolderURL = async (studentName: string, sciper: string, doctoratID: string, ticket: string): Promise<URL> => {
+export const getStudentFolderURL = async (studentName: string, sciper: string, doctoralID: string, ticket: string): Promise<URL> => {
   const studentFolderName = `${studentName}, ${sciper}`
-  const doctoratName = _.find(ecolesDoctorales, {id: doctoratID})?.label ?? doctoratID
+  const doctoratName = _.find(ecolesDoctorales, {id: doctoralID})?.label ?? doctoralID
 
   const StudentsFolderURL = new URL(
     `/alfresco/api/-default-/public/cmis/versions/1.1/browser/root/Etudiants/Dossiers%20Etudiants/${encodeURIComponent(studentFolderName)}/${encodeURIComponent(doctoratName)}/Cursus`,
