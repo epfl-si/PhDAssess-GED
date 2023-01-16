@@ -58,7 +58,13 @@ const handler: ZBWorkerTaskHandler = async (
   const phdStudentSciper = jobVariables.phdStudentSciper
   const doctoralID = jobVariables.doctoralProgramName
 
-  const pdfFileName = `Rapport annuel doctorat.pdf`
+  const getPDFName = () => {
+    const date = new Date()
+    return `Rapport annuel doctorat ${date.toISOString().slice(0,10)}.pdf`
+  }
+
+  const pdfFileName = getPDFName()
+
   const base64String = jobVariables.PDF
   const pdfFile = Buffer.from(base64String, 'base64')
 
