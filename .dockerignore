@@ -1,0 +1,9 @@
+.idea
+.git
+.editorconfig
+.env
+ansible/
+node_modules/
+Dockerfile
+build
+tests/

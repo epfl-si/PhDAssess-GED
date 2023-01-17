@@ -1,10 +1,10 @@
-- name: Locally build and tag phd-assess-meteor image
+- name: Locally (and silently) build and tag phd-assess-meteor image
   tags:
     - ged-build
     - never
   shell: |
     set -e -x
-    npm run build && docker build --tag {{ phd_assess_ged_servicename }} ..
+    docker build --tag {{ phd_assess_ged_servicename }} ..
   delegate_to: localhost
   register: output_docker_build
 - debug: var=output_docker_build.stdout_lines
