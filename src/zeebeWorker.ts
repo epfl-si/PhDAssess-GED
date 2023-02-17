@@ -1,6 +1,7 @@
 import {ZBClient} from "zeebe-node";
 import {Duration, ZBWorkerTaskHandler} from 'zeebe-node'
 import debug_ from 'debug'
+import type {PhDAssessVariables} from "phd-assess-meta/types/variables";
 import {decryptVariables, encrypt} from "./encryption";
 import {flatPick} from "./utils";
 import {
@@ -46,17 +47,17 @@ const handler: ZBWorkerTaskHandler = async (
 
   const jobVariables = decryptVariables(job)
 
-  const buildStudentName = (jobVariables: any) => {
+  const buildStudentName = (jobVariables: PhDAssessVariables) => {
     if (jobVariables.phdStudentFirstName && jobVariables.phdStudentLastName) {
       return `${jobVariables.phdStudentLastName}, ${jobVariables.phdStudentFirstName}`
     } else {
-      return jobVariables.phdStudentName
+      return jobVariables.phdStudentName ?? ''
     }
   }
   const phdStudentName = buildStudentName(jobVariables)
 
-  const phdStudentSciper = jobVariables.phdStudentSciper
-  const doctoralID = jobVariables.doctoralProgramName
+  const phdStudentSciper = jobVariables.phdStudentSciper ?? ''
+  const doctoralID = jobVariables.doctoralProgramName ?? ''
 
   const getPDFName = () => {
     const date = new Date()
@@ -65,7 +66,7 @@ const handler: ZBWorkerTaskHandler = async (
 
   const pdfFileName = getPDFName()
 
-  const base64String = jobVariables.PDF
+  const base64String = jobVariables.PDF ?? ''
   const pdfFile = Buffer.from(base64String, 'base64')
 
   try {

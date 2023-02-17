@@ -3,6 +3,7 @@ import debug_ from "debug";
 const CryptoJS = require("crypto-js");
 const debug = debug_('encryption')
 import {Job} from "zeebe-node"
+import type {PhDAssessVariables} from "phd-assess-meta/types/variables";
 
 export function encrypt(message: string | [], passphrase: string | undefined = process.env.PHDASSESS_ENCRYPTION_KEY): string {
   if (passphrase === undefined) {
@@ -29,8 +30,8 @@ export function decrypt(cryptedMessage: string, passphrase: string | undefined =
   }
 }
 
-export function decryptVariables(job: Job): { [key: string]: string } {
-  const decryptedVariables: { [key: string]: string } = {}
+export function decryptVariables(job: Job): PhDAssessVariables {
+  const decryptedVariables: any = {}
 
   Object.keys(job.variables).map((key) => {
     try {
@@ -53,5 +54,5 @@ export function decryptVariables(job: Job): { [key: string]: string } {
       }
     }
   })
-  return decryptedVariables
+  return decryptedVariables as PhDAssessVariables
 }
