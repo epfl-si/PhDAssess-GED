@@ -13,6 +13,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "engines": {
+    "node": "18"
+  },
   "dependencies": {
     "console-log-json": "^2.8.0",
     "crypto-js": "^4.0.0",
