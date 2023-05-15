@@ -30,7 +30,7 @@
     "zeebe-node": "^2.4.0"
   },
   "devDependencies": {
-    "@tsconfig/node16": "^1.0.3",
+    "@tsconfig/node18": "^1.0.3",
     "@types/chai": "^4.3.5",
     "@types/chai-fs": "^2.0.2",
     "@types/crypto-js": "^4.0.1",
