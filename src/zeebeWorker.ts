@@ -22,6 +22,12 @@ export const zBClient = new ZBClient({
 
 const taskType = process.env.ZEEBE_TASK_TYPE ? process.env.ZEEBE_TASK_TYPE : ''
 
+// list which variables are not encrypted.
+const alreadyDecryptedVariables = [
+  'dashboardDefinition',
+  'uuid',
+]
+
 const handler: ZBWorkerTaskHandler = async (
   job
 ) => {
@@ -43,7 +49,7 @@ const handler: ZBWorkerTaskHandler = async (
     )
   })
 
-  const jobVariables = decryptVariables(job)
+  const jobVariables = decryptVariables(job, alreadyDecryptedVariables)
 
   const buildStudentName = (jobVariables: PhDAssessVariables) => {
     if (jobVariables.phdStudentFirstName && jobVariables.phdStudentLastName) {
