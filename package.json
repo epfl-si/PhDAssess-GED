@@ -1,12 +1,12 @@
 {
   "name": "phd-assess-ged",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "",
   "main": "src/makePDF.js",
   "scripts": {
     "start": "genversion src/version.js && ts-node -r dotenv/config ./src/index.ts",
     "build": "tsc -p . && genversion build/version.js",
-    "build-docker": "docker build --tag phd-assess-pdf .",
+    "build-docker": "docker build --tag phd-assess-ged .",
     "test": "mocha -r ts-node/register tests/**/*.test.ts",
     "postinstall": "patch-package"
   },
