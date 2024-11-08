@@ -5,24 +5,24 @@ const debug = debug_('encryption')
 import {Job} from "zeebe-node"
 import type {PhDAssessVariables} from "phd-assess-meta/types/variables";
 
-export function encrypt(message: string | [], passphrase: string | undefined = process.env.PHDASSESS_ENCRYPTION_KEY): string {
+
+export function encrypt(message: string | null | [], passphrase: string | undefined = process.env.PHDASSESS_ENCRYPTION_KEY): string | null {
   if (passphrase === undefined) {
     throw 'encryption error, trying to encrypt a value without a passphrase set'
   }
 
-  if (message === "") {
+  if (message === "" || message == null) {
     return message;
   } else {
     return CryptoJS.AES.encrypt(JSON.stringify(message), passphrase).toString();
   }
-
 }
 
-export function decrypt(cryptedMessage: string | null, passphrase: string | undefined = process.env.PHDASSESS_ENCRYPTION_KEY): string {
+export function decrypt(cryptedMessage: string | null, passphrase: string | undefined = process.env.PHDASSESS_ENCRYPTION_KEY): string | null {
   if (passphrase === undefined) {
     throw 'encryption error, Trying to encrypt a value without a passphrase set'
   }
-  if (cryptedMessage === "") {
+  if (cryptedMessage === "" || cryptedMessage == null) {
     return cryptedMessage;
   } else {
     const bytes = CryptoJS.AES.decrypt(cryptedMessage, passphrase)
@@ -30,19 +30,22 @@ export function decrypt(cryptedMessage: string | null, passphrase: string | unde
   }
 }
 
-
 export function decryptVariables(job: Job, ignoreKeys: string[] = []): PhDAssessVariables {
-  const decryptedVariables: any = {}
+  const decryptedVariables:
+    {
+      [ key: string ]:
+        string |
+        null |
+        ( string | null )[]
+    } = {}
 
   Object.keys(job.variables).map((key) => {
     if (ignoreKeys.includes(key)) {
       decryptedVariables[key] = job.variables[key]
     } else {
       try {
-        if (job.variables[key] == null) {  // null is a "defined" valid json entry
-          decryptedVariables[key] = null
-        } else if (Array.isArray(job.variables[key])) {
-          decryptedVariables[key] = job.variables[key].reduce((acc: string[], item: string | null) => {
+        if (Array.isArray(job.variables[key])) {
+          decryptedVariables[key] = job.variables[key].reduce((acc: ( string | null )[], item: string | null) => {
             acc.push(decrypt(item))
             return acc
           }, [])
@@ -61,5 +64,5 @@ export function decryptVariables(job: Job, ignoreKeys: string[] = []): PhDAssess
       }
     }
   })
-  return decryptedVariables as PhDAssessVariables
+  return decryptedVariables as unknown as PhDAssessVariables
 }
