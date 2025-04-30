@@ -11,7 +11,7 @@ const chai = require('chai')
 const expect = chai.expect
 
 const phdStudentName = process.env.PHDSTUDENTNAME!
-const phdStudentSciper = process.env.PHDSUTDENTSCIPER!
+const phdStudentSciper = process.env.PHDSTUDENTSCIPER!
 const doctoratID = process.env.PHDSTUDENTDOCTORAT!
 
 const pdfFileName = `Rapport annuel doctorat.pdf`
