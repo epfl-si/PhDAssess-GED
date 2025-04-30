@@ -9,6 +9,7 @@ import {FormData, File} from 'formdata-node'
 import {FormDataEncoder} from "form-data-encoder"
 import {ecolesDoctorales} from "./doctorats"
 import {AlfrescoTicketResponse} from "./alfresco_types"
+import * as fs from "node:fs";
 
 
 const debug = debug_('ged-connector')
@@ -57,6 +58,29 @@ export const getStudentFolderURL = async (studentName: string, sciper: string, d
 export const readFolder = async (studentFolder: URL,) => {
   const studentFolderInfo = await got.get(studentFolder, {}).json()
   debug(`Fetched ${JSON.stringify(studentFolderInfo, null, 2)}`)
+}
+
+export const downloadFile = async (
+  studentFolder: URL,
+  fileName: string,
+  destinationPath: string
+) => {
+  // Append parameters a new URL remove them
+  const urlParameters = studentFolder.searchParams
+  const fullPath = new URL(
+      'Cursus/' + fileName + '?' + urlParameters,
+      studentFolder
+    )
+
+  debug(`Getting file '${fullPath}' to save locally`)
+
+  got.stream(
+    fullPath, {}
+  ).pipe(
+    fs.createWriteStream(destinationPath)
+  )
+
+  debug(`File fetched to ${destinationPath}`)
 }
 
 export const uploadPDF = async (studentFolder: URL,
