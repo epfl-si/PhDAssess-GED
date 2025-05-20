@@ -4,15 +4,24 @@
  */
 require('dotenv').config()
 
-import {getStudentFolderURL, fetchTicket, readFolder, uploadPDF} from "../src/ged-connector";
 import 'mocha'
 
 const chai = require('chai')
 const expect = chai.expect
 
+import {
+  getStudentFolderURL,
+  fetchTicket,
+  readFolder,
+  uploadPDF,
+  downloadFile
+} from "../src/ged-connector";
+
+
 const phdStudentName = process.env.PHDSTUDENTNAME!
 const phdStudentSciper = process.env.PHDSTUDENTSCIPER!
 const doctoratID = process.env.PHDSTUDENTDOCTORAT!
+const pdfToRead= process.env.PDFNAMETOREAD!
 
 const pdfFileName = `Rapport annuel doctorat.pdf`
 const base64String = process.env.PDFSTRING!
@@ -34,13 +43,27 @@ describe('Testing GED deposit', async () => {
     await readFolder(alfrescoStudentsFolderURL)
   })
 
-  it('should upload the pdf to the student folder', async () => {
+  it('should save a pdf', async () => {
     const ticket = await fetchTicket()
     const alfrescoStudentsFolderURL = await getStudentFolderURL(phdStudentName,
-        phdStudentSciper,
-        doctoratID,
-        ticket
+      phdStudentSciper,
+      doctoratID,
+      ticket
     )
-    await uploadPDF(alfrescoStudentsFolderURL, pdfFileName, pdfFile)
+    await downloadFile(
+      alfrescoStudentsFolderURL,
+      pdfToRead,
+      `/tmp/${ pdfToRead }`
+    )
   })
+
+  // it('should upload the pdf to the student folder', async () => {
+  //   const ticket = await fetchTicket()
+  //   const alfrescoStudentsFolderURL = await getStudentFolderURL(phdStudentName,
+  //       phdStudentSciper,
+  //       doctoratID,
+  //       ticket
+  //   )
+  //   await uploadPDF(alfrescoStudentsFolderURL, pdfFileName, pdfFile)
+  // })
 })
