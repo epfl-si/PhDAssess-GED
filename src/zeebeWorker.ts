@@ -10,7 +10,7 @@ import {
   getStudentFolderURL,
   readFolder,
   uploadPDF
-} from "./ged-connector";
+} from "phdassess-ged-connector";
 
 const version = require('./version.js');
 
@@ -75,12 +75,18 @@ const handler: ZBWorkerTaskHandler = async (
 
   try {
     // first always get a new ticket for incoming operations or fail trying
-    const ticket = await fetchTicket()
+    const ticket = await fetchTicket(
+      process.env.ALFRESCO_USERNAME!,
+      process.env.ALFRESCO_PASSWORD!,
+      process.env.ALFRESCO_URL!
+  )
     // build the student URL
     const alfrescoStudentsFolderURL = await getStudentFolderURL(phdStudentName,
         phdStudentSciper,
         doctoralID,
-        ticket)
+        ticket,
+        process.env.ALFRESCO_URL!
+      )
 
     // check if the awaited student folder exists
     try {
