@@ -10,7 +10,7 @@ import {
   getStudentFolderURL,
   readFolder,
   uploadPDF
-} from "phdassess-ged-connector";
+} from "phd-assess-ged-connector";
 
 const version = require('./version.js');
 

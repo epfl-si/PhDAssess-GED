@@ -24,7 +24,7 @@
     "genversion": "^3.0.2",
     "lodash": "^4.17.21",
     "patch-package": "^6.4.7",
-    "phdassess-ged-connector": "github:epfl-si/PhDAssess-GED-connector",
+    "phd-assess-ged-connector": "github:epfl-si/PhDAssess-GED-connector",
     "zeebe-node": "^8.2.5"
   },
   "devDependencies": {
