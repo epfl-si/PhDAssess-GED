@@ -79,7 +79,8 @@ const handler: ZBWorkerTaskHandler = async (
       process.env.ALFRESCO_USERNAME!,
       process.env.ALFRESCO_PASSWORD!,
       process.env.ALFRESCO_URL!
-  )
+    )
+
     // build the student URL
     const alfrescoStudentsFolderURL = await getStudentFolderURL(phdStudentName,
         phdStudentSciper,
