@@ -9,7 +9,8 @@ import {
   fetchTicket,
   getStudentFolderURL,
   readFolder,
-  uploadPDF
+  uploadPDF,
+  buildStudentName
 } from "phd-assess-ged-connector";
 
 const version = require('./version.js');
@@ -51,13 +52,6 @@ const handler: ZBWorkerTaskHandler = async (
 
   const jobVariables = decryptVariables(job, alreadyDecryptedVariables)
 
-  const buildStudentName = (jobVariables: PhDAssessVariables) => {
-    if (jobVariables.phdStudentFirstName && jobVariables.phdStudentLastName) {
-      return `${jobVariables.phdStudentLastName}, ${jobVariables.phdStudentFirstName}`
-    } else {
-      return jobVariables.phdStudentName ?? ''
-    }
-  }
   const phdStudentName = buildStudentName(jobVariables)
 
   const phdStudentSciper = jobVariables.phdStudentSciper ?? ''
@@ -82,21 +76,26 @@ const handler: ZBWorkerTaskHandler = async (
     )
 
     // build the student URL
-    const alfrescoStudentsFolderURL = await getStudentFolderURL(phdStudentName,
-        phdStudentSciper,
-        doctoralID,
-        ticket,
-        process.env.ALFRESCO_URL!
-      )
+    const alfrescoStudentsFolderURL = await getStudentFolderURL(
+      phdStudentName,
+      phdStudentSciper,
+      doctoralID,
+      ticket,
+      process.env.ALFRESCO_URL!
+    )
 
     // check if the awaited student folder exists
     try {
+
       await readFolder(alfrescoStudentsFolderURL)
+
       // ok, looks fine, now try to deposit the pdf
       try {
+
         await uploadPDF(
-            alfrescoStudentsFolderURL,
-            pdfFileName, pdfFile
+          alfrescoStudentsFolderURL,
+          pdfFileName,
+          pdfFile
         )
 
         console.log(`Successfully uploaded the ${pdfFileName} for ${phdStudentName} (${phdStudentSciper}) into ${alfrescoStudentsFolderURL}`)
@@ -106,6 +105,7 @@ const handler: ZBWorkerTaskHandler = async (
         }
 
         return job.complete(updateBrokerVariables)
+
       } catch (e: any) {
         console.log(`Unable to send the PDF file into ${alfrescoStudentsFolderURL}. Error was : ${e.message}`)
         return job.error('504', `Unable to upload the PDF. ${e.message}`)
