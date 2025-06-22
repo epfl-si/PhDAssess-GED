@@ -5,11 +5,11 @@ import type {PhDAssessVariables} from "phd-assess-meta/types/variables";
 import {decryptVariables, encrypt} from "./encryption";
 import {flatPick} from "./utils";
 import {
-  alfrescoBaseURL,
+  AlfrescoInfo,
   fetchTicket,
   readFolder,
   uploadPDF,
-  buildStudentName
+  StudentInfo
 } from "phdassess-ged-connector";
 
 const version = require('./version.js');
@@ -51,10 +51,11 @@ const handler: ZBWorkerTaskHandler = async (
 
   const jobVariables = decryptVariables(job, alreadyDecryptedVariables)
 
-  const phdStudentName = buildStudentName(jobVariables)
-
-  const phdStudentSciper = jobVariables.phdStudentSciper ?? ''
-  const doctoralAcronym = jobVariables.doctoralProgramName ?? ''
+  const studentInfo: StudentInfo = {
+    doctoralAcronym: jobVariables.doctoralProgramName ?? '',
+    studentName: process.env.PHDSTUDENTNAME!,
+    sciper:jobVariables.phdStudentSciper ?? '',
+  }
 
   const getPDFName = () => {
     const date = new Date()
@@ -66,58 +67,45 @@ const handler: ZBWorkerTaskHandler = async (
   const base64String = jobVariables.PDF ?? ''
   const pdfFileBuffer = Buffer.from(base64String, 'base64')
 
+  const alfrescoInfo: AlfrescoInfo = {
+    serverUrl: process.env.ALFRESCO_URL!,
+    username: process.env.ALFRESCO_USERNAME!,
+    password: process.env.ALFRESCO_PASSWORD!,
+  }
+
   try {
+
     // first get a new ticket for incoming operations or fail trying
-    const ticket = await fetchTicket(
-      process.env.ALFRESCO_USERNAME!,
-      process.env.ALFRESCO_PASSWORD!,
-      process.env.ALFRESCO_URL!
+    const ticket = await fetchTicket(alfrescoInfo)
+
+    // check if the awaited student folder exists
+    await readFolder(
+      alfrescoInfo,
+      studentInfo,
+      ticket
     )
 
-    try {
-      // check if the awaited student folder exists
-      await readFolder(
-        process.env.ALFRESCO_URL!,
-        {
-          studentName: phdStudentName,
-          sciper: phdStudentSciper,
-          doctoralAcronym: doctoralAcronym,
-        },
-        ticket
-      )
+    const pdfFullPath = await uploadPDF(
+      alfrescoInfo,
+      studentInfo,
+      ticket,
+      pdfFileName,
+      pdfFileBuffer
+    ) as string
 
-      // ok, looks fine, now try to deposit the pdf
-      try {
-        const finalPdfFileName = await uploadPDF(
-          process.env.ALFRESCO_URL!,
-          {
-            studentName: phdStudentName,
-            sciper: phdStudentSciper,
-            doctoralAcronym: doctoralAcronym,
-          },
-          ticket,
-          pdfFileName,
-          pdfFileBuffer
-        )
+    console.log(`Successfully uploaded the ${ pdfFullPath } for student (${ studentInfo.sciper })`)
 
-        console.log(`Successfully uploaded the ${finalPdfFileName} for ${phdStudentName} (${phdStudentSciper})`)
-
-        const updateBrokerVariables = {
-          gedDepositedDate: encrypt(new Date().toISOString()),
-        }
-
-        return job.complete(updateBrokerVariables)
-
-      } catch (e: any) {
-        console.log(`Unable to send the PDF file. Error was : ${e.message}`)
-        return job.error('504', `Unable to upload the PDF. ${e.message}`)
-      }
-    } catch (e: any) {
-      console.error(`Failed to read the student folder. Erroring was ${e.message}`)
-      return job.error('404', `Unable to find the student folder ${e.message}`)
+    const updateBrokerVariables = {
+      gedDepositedDate: encrypt(new Date().toISOString()),
     }
+
+    return job.complete(updateBrokerVariables)
+
   } catch (e: any) {
-    console.error(`Failed to get an Alfresco ticket on ${alfrescoBaseURL}. Error was ${e.message}`)
+    console.error(
+      `Failed to push the PDF into Alfresco on ${alfrescoInfo.serverUrl} for process instance ${ job.processInstanceKey }. ` +
+      `Error was ${e.message}`
+    )
     return job.error('504', `Unable to get an Alfresco ticket. ${e.message}`)
   }
 }
