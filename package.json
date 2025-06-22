@@ -7,7 +7,6 @@
     "start": "genversion src/version.js && ts-node -r dotenv/config ./src/index.ts",
     "build": "tsc -p . && genversion build/version.js",
     "build-docker": "docker build --tag phd-assess-ged .",
-    "test": "mocha -r ts-node/register tests/**/*.test.ts",
     "postinstall": "patch-package"
   },
   "keywords": [],
