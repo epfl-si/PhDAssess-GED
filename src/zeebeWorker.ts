@@ -5,10 +5,11 @@ import {decryptVariables, encrypt} from "./encryption";
 import {flatPick} from "./utils";
 import {
   AlfrescoInfo,
+  StudentInfo,
+  buildStudentName,
   fetchTicket,
   readFolder,
-  uploadPDF,
-  StudentInfo
+  uploadPDF
 } from "phdassess-ged-connector";
 
 const version = require('./version.js');
@@ -44,6 +45,7 @@ const handler: ZBWorkerTaskHandler = async (
         'worker',
         'variables.created_at',
         'variables.created_by',
+        'variables.pdfAnnexPath',
       ]
     )
   })
@@ -52,7 +54,7 @@ const handler: ZBWorkerTaskHandler = async (
 
   const studentInfo: StudentInfo = {
     doctoralAcronym: jobVariables.doctoralProgramName ?? '',
-    studentName: process.env.PHDSTUDENTNAME!,
+    studentName: buildStudentName(jobVariables),
     sciper:jobVariables.phdStudentSciper ?? '',
   }
 
