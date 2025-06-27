@@ -1,7 +1,6 @@
 import {ZBClient} from "zeebe-node";
 import {Duration, ZBWorkerTaskHandler} from 'zeebe-node'
 import debug_ from 'debug'
-import type {PhDAssessVariables} from "phd-assess-meta/types/variables";
 import {decryptVariables, encrypt} from "./encryption";
 import {flatPick} from "./utils";
 import {
