@@ -1,9 +1,0 @@
-# Production inventory
-# N.B.: groups and group variables are defined in ../inventory.yml
-
-all:
-  children:
-    openshift_namespaces:
-      hosts:
-        phd-assess:
-          alfresco_url: "https://ged-etu.epfl.ch"
