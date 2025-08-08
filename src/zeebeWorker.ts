@@ -3,13 +3,15 @@ import {Duration, ZBWorkerTaskHandler} from 'zeebe-node'
 import debug_ from 'debug'
 import {decryptVariables, encrypt} from "./encryption";
 import {flatPick} from "./utils";
+import {mergePDFs} from "phd-assess-meta"
 import {
   AlfrescoInfo,
   StudentInfo,
   buildStudentName,
   fetchTicket,
   readFolder,
-  uploadPDF
+  uploadPDF,
+  fetchFileAsBase64
 } from "phdassess-ged-connector";
 
 const version = require('./version.js');
@@ -47,7 +49,8 @@ const handler: ZBWorkerTaskHandler = async (
         'variables.created_by',
         'variables.pdfAnnexPath',
       ]
-    )
+    ),
+    hasPDFAnnexPath: !!job.variables.pdfAnnexPath,
   })
 
   const jobVariables = decryptVariables(job, alreadyDecryptedVariables)
@@ -64,9 +67,6 @@ const handler: ZBWorkerTaskHandler = async (
   }
 
   const pdfFileName = getPDFName()
-
-  const base64String = jobVariables.PDF ?? ''
-  const pdfFileBuffer = Buffer.from(base64String, 'base64')
 
   const alfrescoInfo: AlfrescoInfo = {
     serverUrl: process.env.ALFRESCO_URL!,
@@ -86,12 +86,24 @@ const handler: ZBWorkerTaskHandler = async (
       ticket
     )
 
+    let generatedPDF = jobVariables.PDF ?? ''
+
+    // check the need to download an annex before pushing the provided PDF
+    if (generatedPDF && jobVariables.pdfAnnexPath) {
+      const pdfAnnexAsBase64 = await fetchFileAsBase64(
+        jobVariables.pdfAnnexPath,
+        ticket,
+      )
+      // merge the two
+      generatedPDF = await mergePDFs(generatedPDF, pdfAnnexAsBase64)
+    }
+
     const pdfFullPath = await uploadPDF(
       alfrescoInfo,
       studentInfo,
       ticket,
       pdfFileName,
-      pdfFileBuffer
+      Buffer.from(generatedPDF, 'base64')
     ) as string
 
     console.log(`Successfully uploaded the ${ pdfFullPath } for student (${ studentInfo.sciper })`)
