@@ -2,8 +2,8 @@ import {ZBClient} from "zeebe-node";
 import {Duration, ZBWorkerTaskHandler} from 'zeebe-node'
 import debug_ from 'debug'
 import {decryptVariables, encrypt} from "./encryption";
-import {flatPick} from "./utils";
-import {mergePDFs} from "phd-assess-meta"
+import {flatPick, mergePDFs} from "./utils";
+
 import {
   AlfrescoInfo,
   StudentInfo,
@@ -17,6 +17,7 @@ import {
 const version = require('./version.js');
 
 const debug = debug_('phd-assess/zeebeWorker')
+
 
 export const zBClient = new ZBClient({
   pollInterval: Duration.seconds.of(10),
