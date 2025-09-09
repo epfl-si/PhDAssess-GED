@@ -24,7 +24,7 @@
     "lodash": "^4.17.21",
     "patch-package": "^6.4.7",
     "pdf-lib": "^1.17.1",
-    "phd-assess-meta": "github:epfl-si/PhDAssess-meta#feature/pdf-file",
+    "phd-assess-meta": "github:epfl-si/PhDAssess-meta",
     "phdassess-ged-connector": "github:epfl-si/PhDAssess-GED-connector",
     "zeebe-node": "^8.2.5"
   },
