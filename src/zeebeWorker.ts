@@ -77,7 +77,7 @@ const handler: ZBWorkerTaskHandler = async (
 
   try {
 
-    // first get a new ticket for incoming operations or fail trying
+    // first get a new ticket for incoming operations or fail while trying
     const ticket = await fetchTicket(alfrescoInfo)
 
     // check if the awaited student folder exists
